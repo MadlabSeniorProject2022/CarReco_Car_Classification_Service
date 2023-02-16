@@ -1,9 +1,12 @@
 from flask import Flask, request, jsonify
 from PIL import Image
-import io
 from classify.predict import UseModel
-app = Flask(__name__)
+
 import os
+from preprocess import read_and_process
+import time
+
+app = Flask(__name__)
 
 model = UseModel(weights=["car_reco_model.pt"])
 
@@ -15,9 +18,10 @@ def predict():
     if request.files.get("image"):
         im_file = request.files["image"]
         im_bytes = im_file.read()
-        im = Image.open(io.BytesIO(im_bytes))
-        im = im.save("./to_predict/im.jpg")
-        result = model.predict("to_predict/im.jpg")
+        path = f"./to_predict/{int(time.time() * 1000000)}.jpg"
+        read_and_process(im_bytes, path)
+        result = model.predict(path)
+        os.remove(path) # clear storage after finish process
 
     return jsonify({'msg': 'success', 'predicted': result[0]})
 

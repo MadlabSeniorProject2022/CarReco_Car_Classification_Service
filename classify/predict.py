@@ -29,7 +29,6 @@ Usage - formats:
 """
 
 import os
-import platform
 import sys
 from pathlib import Path
 
@@ -45,9 +44,7 @@ ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 from models.common import DetectMultiBackend
 from utils.augmentations import classify_transforms
 from utils.dataloaders import IMG_FORMATS, VID_FORMATS, LoadImages, LoadScreenshots, LoadStreams
-from utils.general import (LOGGER, Profile, check_file, check_img_size, check_imshow, check_requirements, colorstr, cv2,
-                           increment_path, print_args, strip_optimizer)
-from utils.plots import Annotator
+from utils.general import (Profile, check_file, check_img_size, check_imshow)
 from utils.torch_utils import select_device, smart_inference_mode
 
 
@@ -60,9 +57,8 @@ class UseModel:
         self.stride, self.names, self.pt = self.model.stride, self.model.names, self.model.pt
         self.imgsz = check_img_size(imgsz, s=self.stride)  # check image size
 
-    def predict(self, source='to_predict/img.jpg', view_img=False, save_txt=False, nosave=False, augment=False, visualize=False, update=False, project='runs/predict-cls', name='exp', exist_ok=False, vid_stride=1):
+    def predict(self, source='to_predict/img.jpg', vid_stride=1):
         source = str(source)
-        save_img = not nosave and not source.endswith('.txt')  # save inference images
         is_file = Path(source).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
         is_url = source.lower().startswith(('rtsp://', 'rtmp://', 'http://', 'https://'))
         webcam = source.isnumeric() or source.endswith('.streams') or (is_url and not is_file)
@@ -70,10 +66,6 @@ class UseModel:
         if is_url and is_file:
             source = check_file(source)  # download
 
-        # Directories
-        save_dir = increment_path(Path(project) / name, exist_ok=exist_ok)  # increment run
-        (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
-        
         # Dataloader
         bs = 1  # batch_size
         if webcam:
@@ -115,11 +107,8 @@ class UseModel:
                     p, im0, frame = path, im0s.copy(), getattr(dataset, 'frame', 0)
 
                 p = Path(p)  # to Path
-                save_path = str(save_dir / p.name)  # im.jpg
-                txt_path = str(save_dir / 'labels' / p.stem) + ('' if dataset.mode == 'image' else f'_{frame}')  # im.txt
 
                 s += '%gx%g ' % im.shape[2:]  # print string
-                annotator = Annotator(im0, example=str(self.names), pil=True)
 
                 # Print results
                 top5i = prob.argsort(0, descending=True)[:5].tolist()  # top 5 indices

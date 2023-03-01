@@ -82,6 +82,7 @@ class UseModel:
         self.model.warmup(imgsz=(1 if self.pt else bs, 3, *self.imgsz))  # warmup
         seen, windows, dt = 0, [], (Profile(), Profile(), Profile())
         result = []
+        possible = []
         for path, im, im0s, vid_cap, s in dataset:
             with dt[0]:
                 im = torch.Tensor(im).to(self.model.device)
@@ -115,5 +116,6 @@ class UseModel:
                 s += f"{', '.join(f'{self.names[j]} {prob[j]:.2f}' for j in top5i)}, "
                 print(f"{self.names[top5i[0]]} -- {prob[top5i[0]]:.2f}")
                 result.append(self.names[top5i[0]] if prob[top5i[0]] >= 0.25 else "unknown")
+                possible.append([{"class": self.names[i], "conf": prob[i]} for i in top5i])
         
-        return result
+        return result, possible

@@ -116,6 +116,6 @@ class UseModel:
                 s += f"{', '.join(f'{self.names[j]} {prob[j]:.2f}' for j in top5i)}, "
                 print(f"{self.names[top5i[0]]} -- {prob[top5i[0]]:.2f}")
                 result.append(self.names[top5i[0]] if prob[top5i[0]] >= 0.25 else "unknown")
-                possible.append([{"class": self.names[i], "conf": prob[i]} for i in top5i])
+                possible.append([{"class": self.names[i], "conf": float(prob[i])} for i in top5i])
         
         return result, possible

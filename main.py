@@ -20,10 +20,10 @@ def predict():
         im_bytes = im_file.read()
         path = f"./to_predict/{int(time.time() * 1000000)}.jpg"
         read_and_process(im_bytes, path)
-        result = model.predict(path)
+        result, possible = model.predict(path)
         os.remove(path) # clear storage after finish process
 
-    return jsonify({'msg': 'success', 'predicted': result[0]})
+    return jsonify({'msg': 'success', 'predicted': result[0], 'possible': possible[0]})
 
 @app.route("/")
 def hello_world():
